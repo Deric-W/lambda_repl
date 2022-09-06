@@ -11,7 +11,7 @@ from lambda_calculus.visitors.normalisation import BetaNormalisingVisitor
 from lark.exceptions import UnexpectedInput
 from .parsing import LambdaTransformer
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 __author__  = "Eric Niklas Wolf"
 __email__   = "eric_niklas.wolf@mailbox.tu-dresden.de"
 __all__ = (
@@ -38,7 +38,6 @@ class LambdaREPL(Cmd):
 
     def parse_term(self, term: str) -> Term[str] | None:
         """parse a term and handle error display"""
-        term = term.strip()
         try:
             return self.transformer.transform_string(term)
         except UnexpectedInput as error:

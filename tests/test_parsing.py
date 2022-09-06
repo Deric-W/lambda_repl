@@ -4,6 +4,7 @@
 
 from unittest import TestCase
 from lambda_calculus.terms import Variable, Abstraction, Application
+from lark import Token
 from lambda_repl import parsing
 
 
@@ -40,6 +41,13 @@ class ParsingTest(TestCase):
         self.assertEqual(
             self.transformer.transform_string("λ   a    \t. \t    b"),
             Abstraction("a", Variable("b"))
+        )
+        self.assertEqual(
+            self.transformer.transform_string("a (   λ  a  . b ) c"),
+            Application.with_arguments(
+                Variable("a"),
+                (Abstraction("a", Variable("b")), Variable("c"))
+            )
         )
 
     def test_variables(self) -> None:
@@ -104,4 +112,127 @@ class ParsingTest(TestCase):
         self.assertEqual(
             self.transformer.transform_string(r"\a.a"),
             Abstraction("a", Variable("a"))
+        )
+
+
+class PostLexTest(TestCase):
+    """Tests for WhitespacePostLex"""
+
+    postlex: parsing.WhitespacePostLex
+
+    def setUp(self) -> None:
+        """create a PostLex"""
+        self.postlex = parsing.WhitespacePostLex()
+
+    def test_no_whitespace(self) -> None:
+        """test handling of tokens other than whitespace"""
+        tokens = (
+            Token("BACKLASH", "\\"),
+            Token("VARIABLE", "a"),
+            Token("DOT", "."),
+            Token("LPAR", "("),
+            Token("VARIABLE", "a"),
+            Token("RPAR", ")")
+        )
+        self.assertEqual(
+            tuple(self.postlex.process(iter(tokens))),
+            tokens
+        )
+
+    def test_abstraction_unnecessary(self) -> None:
+        """test handling of unnecessary whitespace in abstractions"""
+        tokens = (
+            Token("BACKLASH", "λ"),
+            Token("_WHITESPACE", " "),
+            Token("VARIABLE", "a"),
+            Token("_WHITESPACE", "\t"),
+            Token("DOT", "."),
+            Token("_WHITESPACE", "  "),
+            Token("LPAR", "("),
+            Token("VARIABLE", "a"),
+            Token("RPAR", ")")
+        )
+        self.assertEqual(
+            tuple(self.postlex.process(iter(tokens))),
+            (
+                Token("BACKLASH", "λ"),
+                Token("VARIABLE", "a"),
+                Token("DOT", "."),
+                Token("LPAR", "("),
+                Token("VARIABLE", "a"),
+                Token("RPAR", ")")
+            )
+        )
+
+    def test_backslash_unnecessary(self) -> None:
+        """test handling of unnecessary whitespace in abstractions with a backslash"""
+        tokens = (
+            Token("BACKLASH", "\\"),
+            Token("_WHITESPACE", " "),
+            Token("VARIABLE", "a"),
+            Token("_WHITESPACE", "\t"),
+            Token("DOT", "."),
+            Token("_WHITESPACE", "  "),
+            Token("LPAR", "("),
+            Token("VARIABLE", "a"),
+            Token("RPAR", ")")
+        )
+        self.assertEqual(
+            tuple(self.postlex.process(iter(tokens))),
+            (
+                Token("BACKLASH", "\\"),
+                Token("VARIABLE", "a"),
+                Token("DOT", "."),
+                Token("LPAR", "("),
+                Token("VARIABLE", "a"),
+                Token("RPAR", ")")
+            )
+        )
+
+    def test_brackets_unnecessary(self) -> None:
+        """test handling of unnecessary whitespace in brackets"""
+        tokens = (
+            Token("BACKLASH", "\\"),
+            Token("VARIABLE", "a"),
+            Token("DOT", "."),
+            Token("LPAR", "("),
+            Token("_WHITESPACE", "\t"),
+            Token("VARIABLE", "a"),
+            Token("_WHITESPACE", "  "),
+            Token("RPAR", ")")
+        )
+        self.assertEqual(
+            tuple(self.postlex.process(iter(tokens))),
+            (
+                Token("BACKLASH", "\\"),
+                Token("VARIABLE", "a"),
+                Token("DOT", "."),
+                Token("LPAR", "("),
+                Token("VARIABLE", "a"),
+                Token("RPAR", ")")
+            )
+        )
+
+    def test_ends_unnecessary(self) -> None:
+        """test handling of unnecessary whitespace at the start and end"""
+        tokens = (
+            Token("_WHITESPACE", "\t"),
+            Token("VARIABLE", "a"),
+            Token("_WHITESPACE", " ")
+        )
+        self.assertEqual(
+            tuple(self.postlex.process(iter(tokens))),
+            (tokens[1],)
+        )
+
+    def test_necessary(self) -> None:
+        """test handling of necessary whitespace"""
+        tokens = (
+            Token("VARIABLE", "a"),
+            Token("_WHITESPACE", "\t"),
+            Token("VARIABLE", "a")
+        )
+        self.assertEqual(
+            tuple(self.postlex.process(iter(tokens))),
+            tokens
         )

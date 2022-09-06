@@ -2,7 +2,7 @@ _WHITESPACE: /\s+/
 
 VARIABLE: /[^\s().λ\\]+/
 
-abstraction: ("\\" | "λ") _WHITESPACE? VARIABLE _WHITESPACE? "." _WHITESPACE? term
+abstraction: ("\\" | "λ") VARIABLE "." term
 
 application: ( abstraction | VARIABLE | brackets ) ( _WHITESPACE ( abstraction | VARIABLE | brackets ) )+
 
