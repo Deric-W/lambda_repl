@@ -14,7 +14,7 @@ from lark.exceptions import UnexpectedInput
 from .parsing import LambdaTransformer
 from .aliases import Aliases
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 __author__  = "Eric Niklas Wolf"
 __email__   = "eric_niklas.wolf@mailbox.tu-dresden.de"
 __all__ = (
@@ -56,6 +56,21 @@ class LambdaREPL(Cmd):
     def default(self, line: str) -> None:
         """print an error"""
         self.stdout.write(f"*** Unknown command: {line}\n")
+
+    def do_trace(self, arg: str) -> bool:
+        """trace the evaluation of a lambda term"""
+        term = self.parse_term(arg)
+        if term is not None:
+            term = self.aliases.apply(term)
+            for conversion, step in term.accept(self.visitor):
+                if conversion is Conversion.ALPHA:
+                    symbol = "α"
+                elif conversion is Conversion.BETA:
+                    symbol = "β"
+                else:
+                    symbol = "?"    # type: ignore[unreachable]
+                self.stdout.write(f"{symbol} {step}\n")
+        return False
 
     def do_evaluate(self, arg: str) -> bool:
         """evaluate a lambda term"""
