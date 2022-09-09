@@ -14,7 +14,7 @@ from lark.exceptions import UnexpectedInput
 from .parsing import LambdaTransformer
 from .aliases import Aliases
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 __author__  = "Eric Niklas Wolf"
 __email__   = "eric_niklas.wolf@mailbox.tu-dresden.de"
 __all__ = (
@@ -65,6 +65,8 @@ class LambdaREPL(Cmd):
             self.stdout.write(f"{self.visitor.skip_intermediate(term)}\n")
         return False
 
+    do_eval = do_evaluate
+
     def do_alias(self, arg: str) -> bool:
         """define an alias for a lambda term with name = term"""
         match arg.partition("="):
@@ -94,11 +96,9 @@ class LambdaREPL(Cmd):
             self.aliases.clear()
         return False
 
-    def do_EOF(self, arg: str) -> bool:
-        """exit the repl"""
-        return self.do_exit(arg)
-
     def do_exit(self, _: object) -> bool:
         """exit the repl"""
         self.stdout.write("Exiting REPL...\n")
         return True
+
+    do_EOF = do_exit
