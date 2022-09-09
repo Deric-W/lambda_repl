@@ -6,32 +6,36 @@ from __future__ import annotations
 from cmd import Cmd
 from typing import Any
 from lambda_calculus.terms import Term
-from lambda_calculus.visitors.substitution import CountingSubstitutingVisitor
-from lambda_calculus.visitors.normalisation import BetaNormalisingVisitor
+from lambda_calculus.visitors.normalisation import (
+    Conversion,
+    BetaNormalisingVisitor
+)
 from lark.exceptions import UnexpectedInput
 from .parsing import LambdaTransformer
+from .aliases import Aliases
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 __author__  = "Eric Niklas Wolf"
 __email__   = "eric_niklas.wolf@mailbox.tu-dresden.de"
 __all__ = (
     "LambdaREPL",
-    "parsing"
+    "parsing",
+    "aliases"
 )
 
 
 class LambdaREPL(Cmd):
     """interactive REPL"""
 
-    aliases: dict[str, Term[str]]
+    aliases: Aliases[str]
 
     transformer: LambdaTransformer
 
     visitor: BetaNormalisingVisitor
 
-    def __init__(self, transformer: LambdaTransformer, visitor: BetaNormalisingVisitor, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, aliases: Aliases[str], transformer: LambdaTransformer, visitor: BetaNormalisingVisitor, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        self.aliases = {}
+        self.aliases = aliases
         self.transformer = transformer
         self.visitor = visitor
         self.prompt = "λ "
@@ -57,9 +61,7 @@ class LambdaREPL(Cmd):
         """evaluate a lambda term"""
         term = self.parse_term(arg)
         if term is not None:
-            while term.free_variables() & self.aliases.keys():
-                for alias, value in self.aliases.items():
-                    term = term.accept(CountingSubstitutingVisitor(alias, value))
+            term = self.aliases.apply(term)
             self.stdout.write(f"{self.visitor.skip_intermediate(term)}\n")
         return False
 
