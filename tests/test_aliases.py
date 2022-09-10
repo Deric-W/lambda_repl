@@ -23,12 +23,12 @@ class LetAliasesTest(TestCase):
         self.aliases["b"] = Variable("a").apply_to(Variable("c"))
         self.aliases["c"] = Variable("2")
         self.assertEqual(
-            self.aliases,
-            {
-                "a": Variable("1"),
-                "b": Variable("1").apply_to(Variable("c")),
-                "c": Variable("2")
-            }
+            list(self.aliases.items()),
+            [
+                ("a", Variable("1")),
+                ("b", Variable("1").apply_to(Variable("c"))),
+                ("c", Variable("2"))
+            ]
         )
 
     def test_override(self) -> None:
@@ -37,11 +37,11 @@ class LetAliasesTest(TestCase):
         self.aliases["b"] = Variable("a").apply_to(Variable("c"))
         self.aliases["a"] = Variable("2")
         self.assertEqual(
-            self.aliases,
-            {
-                "a": Variable("2"),
-                "b": Variable("1").apply_to(Variable("c")),
-            }
+            list(self.aliases.items()),
+            [
+                ("b", Variable("1").apply_to(Variable("c"))),
+                ("a", Variable("2"))
+            ]
         )
 
     def test_apply(self) -> None:

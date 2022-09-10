@@ -14,13 +14,14 @@ from lark.exceptions import UnexpectedInput
 from .parsing import LambdaTransformer
 from .aliases import Aliases
 
-__version__ = "0.6.0"
+__version__ = "1.0.0"
 __author__  = "Eric Niklas Wolf"
 __email__   = "eric_niklas.wolf@mailbox.tu-dresden.de"
 __all__ = (
     "LambdaREPL",
-    "parsing",
-    "aliases"
+    "aliases",
+    "main",
+    "parsing"
 )
 
 
@@ -38,6 +39,7 @@ class LambdaREPL(Cmd):
         self.aliases = aliases
         self.transformer = transformer
         self.visitor = visitor
+        self.intro = "Welcome to the the Lambda REPL, type 'help' for help"
         self.prompt = "λ "
 
     def parse_term(self, term: str) -> Term[str] | None:
@@ -96,7 +98,7 @@ class LambdaREPL(Cmd):
     def do_aliases(self, _: object) -> bool:
         """list defined aliases"""
         for alias, term in self.aliases.items():
-            self.stdout.write(f"{alias}: {term}\n")
+            self.stdout.write(f"{alias} = {term}\n")
         return False
 
     def do_clear(self, arg: str) -> bool:
