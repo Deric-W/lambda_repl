@@ -26,7 +26,8 @@ ARGUMENT_PARSER.add_argument(
     "-f",
     "--file",
     type=FileType("r"),
-    help="file which should be executed in the REPL"
+    action="append",
+    help="add file which should be executed in the REPL"
 )
 
 
@@ -37,8 +38,8 @@ def main(args: Namespace) -> int:
         LambdaTransformer(),
         BetaNormalisingVisitor()
     )
-    if args.file is not None:
-        for line in args.file:
+    for file in args.file or ():
+        for line in file:
             repl.cmdqueue.append(line)
     repl.cmdloop()
     return 0
