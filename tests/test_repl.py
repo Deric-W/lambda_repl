@@ -5,6 +5,7 @@
 from io import StringIO
 from unittest import TestCase
 from lambda_calculus.terms import Variable
+from lambda_calculus.terms.arithmetic import SUCCESSOR
 from lambda_calculus.visitors.substitution.renaming import CountingSubstitution
 from lambda_calculus.visitors.normalisation import BetaNormalisingVisitor
 from lambda_repl import LambdaREPL
@@ -89,6 +90,42 @@ class REPLTest(TestCase):
     def test_no_alias_value(self) -> None:
         """test handling missing alias values"""
         self.assertFalse(self.repl.onecmd("alias a"))
+        self.assertEqual(self.repl.aliases, {})
+        self.assertTrue(self.stdout.getvalue().startswith("invalid Command: "))
+        self.assertTrue(self.stdout.getvalue().endswith("\n"))
+
+    def test_import(self) -> None:
+        """test importing aliases"""
+        self.assertFalse(self.repl.onecmd(
+            "import SUCC = lambda_calculus.terms.arithmetic.SUCCESSOR"
+        ))
+        self.assertEqual(
+            self.repl.aliases,
+            {
+                "SUCC": SUCCESSOR
+            }
+        )
+
+    def test_invalid_import(self) -> None:
+        """test handling of invalid imports"""
+        for location in (
+            "lambda_calculus.terms.arithmetic.SUCCESSORX",
+            "lambda_calculus.terms.arithmeticX.SUCCESSOR"
+        ):
+            self.assertFalse(self.repl.onecmd(f"import SUCC = {location}"))
+            self.assertEqual(self.repl.aliases, {})
+            self.assertTrue(self.stdout.getvalue().startswith("Error while importing: "))
+            self.assertTrue(self.stdout.getvalue().endswith("\n"))
+            self.stdout.seek(0)
+            self.stdout.truncate(0)
+        self.assertFalse(self.repl.onecmd("import SUCC = lambda_calculus.terms.arithmetic.number"))
+        self.assertEqual(self.repl.aliases, {})
+        self.assertTrue(self.stdout.getvalue().startswith("Error"))
+        self.assertTrue(self.stdout.getvalue().endswith("\n"))
+
+    def test_no_import_value(self) -> None:
+        """test handling missing import values"""
+        self.assertFalse(self.repl.onecmd("import a"))
         self.assertEqual(self.repl.aliases, {})
         self.assertTrue(self.stdout.getvalue().startswith("invalid Command: "))
         self.assertTrue(self.stdout.getvalue().endswith("\n"))

@@ -1,6 +1,6 @@
 [project]
 name = "lambda_repl"
-version = "1.1.0"
+version = "1.2.0"
 description = "REPL for the lambda calculus"
 requires-python = ">=3.10"
 keywords = []
