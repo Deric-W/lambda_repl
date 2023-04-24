@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 from cmd import Cmd
+from importlib import import_module
 from typing import Any
 from lambda_calculus.terms import Term
 from lambda_calculus.visitors.normalisation import (
@@ -14,7 +15,7 @@ from lark.exceptions import UnexpectedInput
 from .parsing import LambdaTransformer
 from .aliases import Aliases
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 __author__  = "Eric Niklas Wolf"
 __email__   = "eric_niklas.wolf@mailbox.tu-dresden.de"
 __all__ = (
@@ -50,6 +51,19 @@ class LambdaREPL(Cmd):
             self.stdout.write(f"Error while parsing: {error}")
             self.stdout.write(error.get_context(term))
         return None
+
+    def import_term(self, location: str) -> Term[str] | None:
+        """import a term and handle error display"""
+        module, _, name = location.strip().rpartition(".")
+        try:
+            term = getattr(import_module(module), name)
+        except Exception as error:
+            self.stdout.write(f"Error while importing: {error}\n")
+            return None
+        if not isinstance(term, Term):
+            self.stdout.write(f"Error: object {term} is not a lambda term\n")
+            return None
+        return term
 
     def emptyline(self) -> bool:
         """ignore empty lines"""
@@ -93,6 +107,17 @@ class LambdaREPL(Cmd):
                     self.aliases[alias.strip()] = term
             case _:
                 self.stdout.write("invalid Command: missing alias value\n")
+        return False
+
+    def do_import(self, arg: str) -> bool:
+        """import an alias from a module with name = module.name"""
+        match arg.partition("="):
+            case (alias, "=", location):
+                term = self.import_term(location)
+                if term is not None:
+                    self.aliases[alias.strip()] = term
+            case _:
+                self.stdout.write("invalid Command: missing import location\n")
         return False
 
     def do_aliases(self, _: object) -> bool:
