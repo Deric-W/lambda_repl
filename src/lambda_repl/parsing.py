@@ -55,7 +55,7 @@ class LambdaTransformer(Transformer[Token, Term[str]]):
             case Token(type="VARIABLE") as name:    # type: ignore
                 return self.VARIABLE(name)          # type: ignore
             case Token() as token:                  # type: ignore
-                raise UnexpectedToken(token, {"VARIABLE",})
+                raise UnexpectedToken(token, {"VARIABLE", })
             case tree:
                 return self.transform(tree)
 

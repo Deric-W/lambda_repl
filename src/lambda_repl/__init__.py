@@ -57,7 +57,7 @@ class LambdaREPL(Cmd):
         module, _, name = location.strip().rpartition(".")
         try:
             term = getattr(import_module(module), name)
-        except Exception as error:
+        except Exception as error:  # pylint: disable=W0718
             self.stdout.write(f"Error while importing: {error}\n")
             return None
         if not isinstance(term, Term):

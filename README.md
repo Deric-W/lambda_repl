@@ -1,5 +1,6 @@
 # lambda_repl
 
+[![Hatch project](https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg)](https://github.com/pypa/hatch)
 ![Tests](https://github.com/Deric-W/lambda_repl/actions/workflows/Tests.yaml/badge.svg)
 [![codecov](https://codecov.io/gh/Deric-W/lambda_repl/branch/main/graph/badge.svg?token=SU3982mC17)](https://codecov.io/gh/Deric-W/lambda_repl)
 
