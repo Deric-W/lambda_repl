@@ -4,8 +4,10 @@ VARIABLE: /[^\s().λ\\]+/
 
 abstraction: ("\\" | "λ") VARIABLE "." term
 
-application: ( abstraction | VARIABLE | brackets ) ( _WHITESPACE ( abstraction | VARIABLE | brackets ) )+
+application: _application_term _WHITESPACE (abstraction | _simple_term)
 
-?brackets: "(" term ")"
+?term: abstraction | _application_term
 
-?term: abstraction | application | VARIABLE | brackets
+_application_term: application | _simple_term
+
+_simple_term: VARIABLE | "(" term ")"

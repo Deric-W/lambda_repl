@@ -73,6 +73,10 @@ class ParsingTest(TestCase):
                 .apply_to(Variable("b"), Variable("c"))
                 .abstract("a", "b")
         )
+        self.assertEqual(
+            self.transformer.transform_string("a λa.a b c"),
+            Variable("a").apply_to(Variable("a").apply_to(Variable("b"), Variable("c")).abstract("a"))
+        )
 
     def test_brackets(self) -> None:
         """test bracket parsing"""
