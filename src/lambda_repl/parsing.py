@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 from collections import deque
-from collections.abc import Iterator, Sequence
+from collections.abc import Iterator
 from itertools import chain
 from lambda_calculus.terms import Abstraction, Application, Term, Variable
 from lark import Lark, Token
@@ -63,6 +63,10 @@ class LambdaTransformer(Transformer[Token, Term[str]]):
         """handle unknown nodes"""
         raise UnexpectedInput(f"unknown node: {data}")
 
+    def __default_token__(self, token: Token) -> Token:
+        """handle unknown tokens"""
+        raise UnexpectedInput(f"unknown token: {token}")
+
     def VARIABLE(self, name: Token) -> Variable[str]:
         """transform a variable node"""
         return Variable(name.value)
@@ -72,9 +76,10 @@ class LambdaTransformer(Transformer[Token, Term[str]]):
         """transform an abstraction"""
         return Abstraction(variable.name, body)
 
-    def application(self, children: Sequence[Term[str]]) -> Application[str]:
+    @v_args(inline=True)
+    def application(self, abstraction: Term[str], argument: Term[str]) -> Application[str]:
         """transform an application"""
-        return Application.with_arguments(children[0], children[1:])
+        return Application(abstraction, argument)
 
 
 PARSER = Lark.open_from_package(
