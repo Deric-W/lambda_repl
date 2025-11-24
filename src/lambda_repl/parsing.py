@@ -52,9 +52,9 @@ class LambdaTransformer(Transformer[Token, Term[str]]):
         """parse a string and return the transformed lambda term"""
         # the parser sometimes return tokens directly instead of a tree
         match PARSER.parse(string):
-            case Token(type="VARIABLE") as name:    # type: ignore
-                return self.VARIABLE(name)          # type: ignore
-            case Token() as token:                  # type: ignore
+            case Token(type="VARIABLE") as name:
+                return self.VARIABLE(name)
+            case Token() as token:
                 raise UnexpectedToken(token, {"VARIABLE", })
             case tree:
                 return self.transform(tree)
