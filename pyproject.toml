@@ -14,7 +14,7 @@ classifiers = [
     "Typing :: Typed"
 ]
 dependencies = [
-    "lambda-calculus ~= 2.0",
+    "lambda-calculus ~= 3.0",
     "lark ~= 1.0"
 ]
 
