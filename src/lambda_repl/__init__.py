@@ -15,7 +15,7 @@ from lark.exceptions import UnexpectedInput
 from .parsing import LambdaTransformer
 from .aliases import Aliases
 
-__version__ = "1.2.0"
+__version__ = "1.2.1"
 __author__  = "Eric Niklas Wolf"
 __email__   = "eric_niklas.wolf@mailbox.tu-dresden.de"
 __all__ = (
